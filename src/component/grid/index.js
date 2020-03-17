@@ -1,13 +1,20 @@
-export default ( size ) => {
-  let data = [];
-  for (let i = 0; i < size; i++) {
-    data.push([]);
-    for (let j = 0; j < size; j++) {
-      data[i][j] = {
-        x: i,
-        y: j,
-      };
-    }
-  }
-  return data;
-};
+import {FlatList, StyleSheet} from 'react-native';
+import React from 'react';
+import Cell from '../cell';
+const Grid = ({size, grid, cellAction})=>(
+    <FlatList
+        contentContainerStyle={styles.flatListInnerStyle}
+        data={grid}
+        numColumns={size}
+        renderItem={(e)=>Cell(e, cellAction)}
+        keyExtractor={(item) => `${item.x},${item.y}`}
+    />
+);
+
+
+const styles = StyleSheet.create({
+    flatListInnerStyle:{
+        flexGrow: 1, justifyContent: 'center',
+    },
+});
+export default Grid;

@@ -1,46 +1,47 @@
-import React, { PureComponent } from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {  useState } from 'react';
+import {StyleSheet, View} from 'react-native';
 import Grid from './component/grid';
+import bombMapFactory from './component/bombMapFactory';
+import {plantBombs, displayCells} from './component/setBombsInPosition';
+import _ from 'lodash/fp';
+export default () => {
+  const size = 10;
+  const [bombMap, upgradeGrid] = useState(bombMapFactory(size));
+  const [isPristine, changePristineStatus] = useState(true);
 
-export default class MineSweeper extends PureComponent {
-  constructor(props) {
-    super(props);
-    const grid = Grid(10);
-    this.state = { grid };
-  }
-  render() {
+  const cellAction = itemSelected => {
+    let newGrid = _.clone(bombMap);
+    if (isPristine){
+      changePristineStatus(!isPristine);
+      console.log(newGrid);
+      newGrid = plantBombs(newGrid, size, itemSelected);
+    }
+    newGrid[itemSelected.y][itemSelected.x].isRevealed = true;
+    newGrid = displayCells(newGrid, size, itemSelected);
+    upgradeGrid(newGrid);
+  };
+
     return (
-      <View style={styles.container}>
-        {this.state.grid.map((value, row) => (
-          <View key={row} style={styles.row}>
-            {value.map((v, column) => {
-              return (
-                <TouchableOpacity
-                  key={`${row},${column}`}
-                  onPress={() => console.log({ row, column, v })}
-                  style={[styles.cell, {
-                    backgroundColor: this.state.grid[row][column].backgroundColor
-                        ? this.state.grid[row][column].backgroundColor
-                        : 'green'}]}
-                  col={row}
-                />
-              );
-            })}
-          </View>
-        ))}
-      </View>
+        <View style={styles.grid}>
+          <Grid grid={_.flatMap(_.identity,bombMap)} size={size} cellAction={cellAction}/>
+        </View>
     );
-  }
-}
+
+};
+
+
 
 const styles = StyleSheet.create({
-  container:{ flex: 1, justifyContent: 'center', alignItems: 'center' },
-  row:{ flexDirection: 'row' },
+  grid: {
+    alignItems:'center',
+  },
+  flatListInnerStyle:{
+    flexGrow: 1, justifyContent: 'center',
+  },
   cell:{
-
     borderColor: 'black',
     borderWidth: 1,
-    width: 30,
-    height: 30,
+    width:40,
+    height:40,
   },
 });
