@@ -1,46 +1,64 @@
-import React, { PureComponent } from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import React, {  useState } from 'react';
+import {StyleSheet, View, Button, Text} from 'react-native';
 import Grid from './component/grid';
+import bombMapFactory from './component/bombMapFactory';
+import Animation from './component/animation';
+import {plantBombs, displayCells, onlyBombLeft} from './component/setBombsInPosition';
+import _ from 'lodash/fp';
+export default () => {
+  const size = 10;
+  const [bombMap, upgradeGrid] = useState(bombMapFactory(size));
+  const [gameStatus, changeGameStatus] = useState('play');
+  const restart = ()=>{
+    upgradeGrid(bombMapFactory(size));
+    changeGameStatus('play');
+  };
+  const cellLongAction = (itemSelected) => {
+    let newGrid = _.clone(bombMap);
+    if (!newGrid[itemSelected.y][itemSelected.x].isRevealed) {
+      newGrid[itemSelected.y][itemSelected.x].isRevealed = true;
+      newGrid[itemSelected.y][itemSelected.x].isFlaggued = true;
+    }
+    else if (newGrid[itemSelected.y][itemSelected.x].isFlaggued){
+      newGrid[itemSelected.y][itemSelected.x].isFlaggued = false;
+    }
+    upgradeGrid(newGrid);
+  };
 
-export default class MineSweeper extends PureComponent {
-  constructor(props) {
-    super(props);
-    const grid = Grid(10);
-    this.state = { grid };
-  }
-  render() {
+  const cellAction = (itemSelected) => {
+    let newGrid = _.clone(bombMap);
+    newGrid = plantBombs(newGrid, size, itemSelected);
+    if (newGrid[itemSelected.y][itemSelected.x].isBomb) {changeGameStatus('lost');}
+    if (onlyBombLeft(newGrid, size)){changeGameStatus('win');}
+    else {
+      newGrid[itemSelected.y][itemSelected.x].isRevealed = true;
+      newGrid = displayCells(newGrid, size, itemSelected);
+      upgradeGrid(newGrid);
+    }
+  };
     return (
-      <View style={styles.container}>
-        {this.state.grid.map((value, row) => (
-          <View key={row} style={styles.row}>
-            {value.map((v, column) => {
-              return (
-                <TouchableOpacity
-                  key={`${row},${column}`}
-                  onPress={() => console.log({ row, column, v })}
-                  style={[styles.cell, {
-                    backgroundColor: this.state.grid[row][column].backgroundColor
-                        ? this.state.grid[row][column].backgroundColor
-                        : 'green'}]}
-                  col={row}
-                />
-              );
-            })}
+        <View style={styles.grid}>
+          <Grid grid={_.flatMap(_.identity,bombMap)} size={size} cellAction={cellAction} cellLongAction={cellLongAction}/>
+          <View>
+            <Text>There is {size} bombs to find </Text>
+            <Text>Long press to flag a cell </Text>
           </View>
-        ))}
-      </View>
+         {gameStatus !== 'play' &&  <Animation >
+            <Text>You {gameStatus}</Text>
+            <Button title={'Restart'} onPress={()=>restart()} color="#841584"/>
+          </Animation>}
+        </View>
     );
-  }
-}
+
+};
+
+
 
 const styles = StyleSheet.create({
-  container:{ flex: 1, justifyContent: 'center', alignItems: 'center' },
-  row:{ flexDirection: 'row' },
-  cell:{
-
-    borderColor: 'black',
-    borderWidth: 1,
-    width: 30,
-    height: 30,
+  grid: {
+    paddingVertical:40,
+    alignItems:'center',
+    justifyContent:'space-around',
+    flex:1,
   },
 });
