@@ -1,5 +1,5 @@
 import React, {  useState } from 'react';
-import {StyleSheet, View, Button, Text} from 'react-native';
+import {StyleSheet,SafeAreaView, View, Button, Text} from 'react-native';
 import Grid from './component/grid';
 import bombMapFactory from './component/bombMapFactory';
 import Animation from './component/animation';
@@ -37,17 +37,18 @@ export default () => {
     }
   };
     return (
-        <View style={styles.grid}>
-          <Grid grid={_.flatMap(_.identity,bombMap)} size={size} cellAction={cellAction} cellLongAction={cellLongAction}/>
-          <View>
-            <Text>There is {size} bombs to find </Text>
-            <Text>Long press to flag a cell </Text>
-          </View>
-         {gameStatus !== 'play' &&  <Animation >
-            <Text>You {gameStatus}</Text>
-            <Button title={'Restart'} onPress={()=>restart()} color="#841584"/>
-          </Animation>}
-        </View>
+        <SafeAreaView style={styles.grid}>
+            <Grid grid={_.flatMap(_.identity,bombMap)} size={size} cellAction={cellAction} cellLongAction={cellLongAction}/>
+            <View>
+              <Text>There is {size} bombs to find </Text>
+              <Text>Long press to flag a cell </Text>
+            </View>
+            {gameStatus !== 'play' &&  <Animation >
+              <Text>You {gameStatus}</Text>
+              <Button title={'Restart'} onPress={()=>restart()} color="#841584"/>
+            </Animation>}
+        </SafeAreaView>
+
     );
 
 };
@@ -56,7 +57,7 @@ export default () => {
 
 const styles = StyleSheet.create({
   grid: {
-    paddingVertical:40,
+    paddingVertical:10,
     alignItems:'center',
     justifyContent:'space-around',
     flex:1,
