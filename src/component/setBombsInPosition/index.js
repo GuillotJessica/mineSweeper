@@ -7,7 +7,6 @@ export const plantBombs = (bombMap = [], size, lastTouched)=>{
     const bombPosition = _.sampleSize(bombNumber,protectFirstItemTouched);
     _.forEach(e =>{
         newBombMap[e.y][e.x].isBomb = true;
-        newBombMap[e.y][e.x].isRevealed = true;
     }, bombPosition);
 
     return newBombMap;
@@ -48,7 +47,6 @@ export const surroundingCells = (newBombMap, size, e) =>{
 
     // bottom
     if (_.includes(e.y + 1, range)){
-
         newArray.push(newBombMap[e.y + 1][e.x]);
     }
 
@@ -65,4 +63,10 @@ export const displayCells = (newGrid, size, itemSelected)=>{
         newArray[itemSelected.y][itemSelected.x].bombsAroundCount = bombsAroundCount;
         newArray[itemSelected.y][itemSelected.x].isRevealed = true;
     return newArray;
+};
+export const onlyBombLeft = (grid, bombNumber) =>{
+    const flGrid = _.flatMap(_.identity, _.clone(grid));
+    return _.filter((e)=>{
+        return !e.isRevealed;
+    },flGrid) === bombNumber;
 };
